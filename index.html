@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>Happy Birthday Basmala</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Great+Vibes&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pink: #ff3fa0;
+    --pink-glow: #ff8fc8;
+    --red: #ff4d5e;
+    --cover-bg: #f6efe2;
+    --cover-ink: #a23e63;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  html,body{
+    width:100%; height:100%; overflow:hidden;
+    background:#000; font-family:'Pacifico', cursive;
+    overscroll-behavior:none;
+  }
+  body{
+      height:100vh; height:100dvh;
+      min-height:100svh;
+      overflow:hidden;
+      -webkit-text-size-adjust:100%;
+      text-size-adjust:100%;
+    }
+  .scene{
+    position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none; transition:opacity 1.2s ease;
+  }
+  .scene.active{ opacity:1; pointer-events:auto; }
+
+  /* ---------- START SCREEN ---------- */
+  #start{ background:#000; z-index:50; flex-direction:column; gap:24px; }
+  #start.active{opacity:1; pointer-events:auto;}
+  #startBtn{
+    font-family:'Pacifico', cursive; font-size:1.2rem; color:#fff;
+    background:transparent; border:2px solid var(--pink); border-radius:50px;
+    padding:16px 38px; cursor:pointer; letter-spacing:1px;
+    box-shadow:0 0 20px rgba(255,63,160,.5);
+  }
+  #startHint{ color:#ff8fc8; font-size:.95rem; opacity:.8; }
+
+  /* ---------- STAGE 1: MATRIX ---------- */
+  #stage1{ background:#000; }
+  #matrixCanvas{ position:absolute; inset:0; z-index:1; }
+  #matrixText{
+    position:relative; z-index:2; text-align:center;
+    font-size:clamp(2.2rem, 9vw, 6rem);
+    color:#fff;
+    text-shadow:0 0 12px var(--pink), 0 0 40px var(--pink-glow);
+    opacity:0; transform:scale(.8);
+    transition:opacity .5s ease, transform .5s ease;
+  }
+  #matrixText.show{ opacity:1; transform:scale(1); }
+  #matrixText.heart{ font-size:clamp(3.6rem, 16vw, 9rem); color:var(--red); }
+
+  /* ---------- STAGE 2: GALAXY + BOOK ---------- */
+  #stage2{
+    background: radial-gradient(ellipse at 30% 20%, #2a1250 0%, #0a0322 45%, #030112 100%);
+    flex-direction:column; gap:16px; overflow:hidden;
+    padding:16px;
+  }
+  .star{ position:absolute; background:#fff; border-radius:50%; opacity:.8; animation:twinkle 3s infinite ease-in-out; }
+  @keyframes twinkle{ 0%,100%{opacity:.2;} 50%{opacity:1;} }
+
+  #loveMessage{
+    position:relative; z-index:3; text-align:center; min-height:2.4em;
+    font-family:'Great Vibes', cursive; color:var(--red);
+    font-size:clamp(1.4rem, 5.5vw, 2.4rem);
+    text-shadow:0 0 10px rgba(255,77,94,.6);
+    opacity:0; transition:opacity .8s ease;
+    padding:0 10px;
+  }
+  #loveMessage.show{ opacity:1; }
+
+  #bookWrap{
+    position:relative; z-index:3;
+    transition: opacity .9s ease, transform .9s ease;
+  }
+  #bookWrap.closing{ opacity:0; transform:scale(.6) translateY(40px); }
+
+  #book{
+    position:relative;
+    width:min(72vw, 300px, 42vh);
+    aspect-ratio: 3 / 4;
+    max-height:62vh;
+    perspective:1600px;
+    touch-action:none;
+    user-select:none;
+  }
+
+  #backCover{
+    position:absolute; inset:0; z-index:0; border-radius:4px 8px 8px 4px;
+    box-shadow:0 14px 40px rgba(0,0,0,.5);
+    overflow:hidden;
+  }
+
+  .leaf{
+    position:absolute; inset:0; border-radius:4px 8px 8px 4px;
+    transform-origin:left center;
+    transform:rotateY(0deg);
+    transition: transform .45s ease, filter .45s ease;
+    backface-visibility:hidden;
+    overflow:hidden;
+    box-shadow:0 14px 40px rgba(0,0,0,.5);
+  }
+  .leaf.dragging{ transition:none; }
+  .leaf.flipped{ transform:rotateY(-178deg); }
+
+  /* cute cover art, used for front and back cover */
+  .cover-art{
+    width:100%; height:100%; background:var(--cover-bg);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+    position:relative;
+    border:1px solid #e7d9c2;
+    box-shadow: inset 0 0 0 10px #fffaf2;
+  }
+  .cover-stars{ position:absolute; top:12%; left:16%; font-size:.85rem; color:#d7a9c4; opacity:.9; }
+  .cover-stars.right{ left:auto; right:14%; top:18%; }
+  .cover-heart{ font-size:2rem; filter:drop-shadow(0 1px 2px rgba(162,62,99,.4)); }
+  .cover-name{ font-family:'Dancing Script', cursive; color:var(--cover-ink); font-size:1.5rem; }
+
+  /* single photo page, framed like a mounted photo in a book */
+  .photo-page{
+    width:100%; height:100%; background:var(--cover-bg);
+    padding:8%; display:flex; align-items:center; justify-content:center;
+  }
+  .photo-page .frame{
+    width:100%; height:100%; border-radius:4px; overflow:hidden;
+    box-shadow:0 3px 10px rgba(0,0,0,.18);
+    background:#fff;
+  }
+  .photo-page img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .photo-page .fallback{
+    width:100%; height:100%; display:flex; align-items:center; justify-content:center;
+    color:var(--cover-ink); font-family:'Dancing Script', cursive; font-size:1.1rem; background:var(--cover-bg);
+  }
+
+  #swipeHintWrap{ position:relative; z-index:3; color:#e8c9dd; font-family:'Dancing Script', cursive; font-size:.95rem; opacity:.7; }
+
+  /* ---------- STAGE 3: PHOTO HEART ---------- */
+  #stage3{
+    background: radial-gradient(ellipse at 50% 20%, #2a1250 0%, #0a0322 55%, #030112 100%);
+    flex-direction:column; gap:18px;
+  }
+  #heartTitle{
+    font-family:'Great Vibes', cursive; color:var(--pink-glow); font-size:clamp(1.6rem,4.5vw,2.4rem);
+    text-shadow:0 0 12px rgba(255,63,160,.6); text-align:center;
+  }
+  #heartGrid{
+    position:relative; width:min(90vw, 420px); height:min(90vw, 420px);
+    animation: heartbeat 1.8s ease-in-out infinite;
+    animation-delay:2.4s;
+  }
+  @keyframes heartbeat{
+    0%,100%{ transform:scale(1); }
+    14%{ transform:scale(1.07); }
+    28%{ transform:scale(1); }
+    42%{ transform:scale(1.07); }
+    70%{ transform:scale(1); }
+  }
+  .photo-slot{
+    position:absolute; width:15%; height:15%; border-radius:6px;
+    overflow:hidden; border:2px solid rgba(255,143,200,.8);
+    box-shadow:0 0 14px rgba(255,63,160,.35);
+    background:#1c0838; display:flex; align-items:center; justify-content:center;
+    transform:translate(-50%,-50%) scale(0); opacity:0;
+    animation: popIn .6s cubic-bezier(.34,1.56,.64,1) forwards;
+  }
+  @keyframes popIn{ to{ transform:translate(-50%,-50%) scale(1); opacity:1; } }
+  .photo-slot img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .photo-slot .fallback{
+    color:#ff8fc8; font-family:'Dancing Script', cursive; font-size:.75rem; text-align:center; padding:2px;
+  }
+
+  /* ---------- MOBILE OPTIMIZATION ---------- */
+  @media (max-width: 600px){
+    #start{ gap:18px; padding:24px; }
+    #startBtn{
+      font-size:1.05rem;
+      padding:14px 30px;
+      min-height:52px;
+    }
+    #startHint{ font-size:.9rem; }
+
+    #stage2{
+      gap:10px;
+      padding:12px;
+    }
+    #loveMessage{
+      font-size:clamp(1.25rem, 6vw, 2rem);
+      line-height:1.15;
+      max-width:95vw;
+    }
+    #book{
+      width:min(78vw, 300px, 48vh);
+      max-height:58vh;
+    }
+    #swipeHintWrap{
+      font-size:.9rem;
+      margin-top:2px;
+    }
+    #heartTitle{
+      font-size:clamp(1.45rem, 7vw, 2.2rem);
+      padding:0 12px;
+    }
+    #heartGrid{
+      width:min(88vw, 420px);
+      height:min(88vw, 420px);
+    }
+  }
+
+  @media (max-height: 650px){
+    #stage2{ gap:6px; }
+    #book{
+      width:min(60vw, 250px, 50vh);
+      max-height:54vh;
+    }
+    #loveMessage{ font-size:1.25rem; }
+  }
+
+  /* Avoid browser gesture/scroll interference while interacting with the book. */
+  #book, #startBtn{
+    -webkit-user-select:none;
+    user-select:none;
+    -webkit-touch-callout:none;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="scene active" id="start">
+  <button id="startBtn">Tap to begin 💕</button>
+  <div id="startHint">for Basmala</div>
+</div>
+
+<div class="scene" id="stage1">
+  <canvas id="matrixCanvas"></canvas>
+  <div id="matrixText"></div>
+</div>
+
+<div class="scene" id="stage2">
+  <div id="loveMessage"></div>
+  <div id="bookWrap">
+    <div id="book">
+      <div id="backCover">
+        <div class="cover-art">
+          <div class="cover-stars">✦</div>
+          <div class="cover-stars right">✧</div>
+          <div class="cover-heart">💖</div>
+          <div class="cover-name">Basmala</div>
+        </div>
+      </div>
+
+      <div class="leaf" data-i="4" style="z-index:1;">
+        <div class="photo-page"><div class="frame"><img src="photo4.jpg" alt="Photo 4"></div></div>
+      </div>
+      <div class="leaf" data-i="3" style="z-index:2;">
+        <div class="photo-page"><div class="frame"><img src="photo3.jpg" alt="Photo 3"></div></div>
+      </div>
+      <div class="leaf" data-i="2" style="z-index:3;">
+        <div class="photo-page"><div class="frame"><img src="photo2.jpg" alt="Photo 2"></div></div>
+      </div>
+      <div class="leaf" data-i="1" style="z-index:4;">
+        <div class="photo-page"><div class="frame"><img src="photo1.jpg" alt="Photo 1"></div></div>
+      </div>
+      <div class="leaf" data-i="0" style="z-index:5;">
+        <div class="cover-art">
+          <div class="cover-stars">✦</div>
+          <div class="cover-stars right">✧</div>
+          <div class="cover-heart">💖</div>
+          <div class="cover-name">Basmala</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="swipeHintWrap">swipe the book</div>
+</div>
+
+<div class="scene" id="stage3">
+  <div id="heartTitle">Happy Birthday, my love</div>
+  <div id="heartGrid"></div>
+</div>
+
+<script>
+function showScene(id){
+  document.querySelectorAll('.scene').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+document.getElementById('startBtn').addEventListener('click', ()=>{
+  showScene('stage1');
+  runMatrixSequence();
+});
+
+/* ============ STAGE 1: MATRIX RAIN ============ */
+const canvas = document.getElementById('matrixCanvas');
+const ctx = canvas.getContext('2d');
+let matrixInterval;
+const PHRASE = "HAPPY BIRTHDAY BASBOSA   ";
+
+function initMatrix(){
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const fontSize = 20;
+  const columns = Math.floor(canvas.width / fontSize);
+  const drops = new Array(columns).fill(0).map(()=> Math.floor(Math.random() * (canvas.height / fontSize)));
+  const charIndex = new Array(columns).fill(0).map((_,i)=> i % PHRASE.length);
+
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0,0,canvas.width, canvas.height);
+
+  matrixInterval = setInterval(()=>{
+    ctx.fillStyle = 'rgba(0,0,0,0.12)';
+    ctx.fillRect(0,0,canvas.width, canvas.height);
+    ctx.font = 'bold ' + fontSize + 'px monospace';
+    ctx.textBaseline = 'top';
+
+    for(let i=0;i<columns;i++){
+      const ch = PHRASE[charIndex[i] % PHRASE.length];
+      ctx.fillStyle = '#ff62b3';
+      if(ch !== ' '){
+        ctx.fillText(ch, i*fontSize, drops[i]*fontSize);
+      }
+      charIndex[i]++;
+      drops[i]++;
+      if(drops[i]*fontSize > canvas.height){
+        drops[i] = 0;
+      }
+    }
+  }, 110);
+}
+window.addEventListener('resize', ()=>{
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  });
+  window.addEventListener('orientationchange', ()=>{
+    setTimeout(()=>{
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }, 250);
+  });
+
+function stopMatrix(){
+  clearInterval(matrixInterval);
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+}
+
+const matrixText = document.getElementById('matrixText');
+
+function showWord(word, isHeart=false){
+  return new Promise(resolve=>{
+    matrixText.classList.toggle('heart', isHeart);
+    matrixText.textContent = word;
+    requestAnimationFrame(()=> matrixText.classList.add('show'));
+    setTimeout(()=>{
+      matrixText.classList.remove('show');
+      setTimeout(resolve, 500);
+    }, isHeart ? 2200 : 1000);
+  });
+}
+
+async function runCountdown(){
+  for(const n of ['3','2','1']){
+    matrixText.classList.remove('heart');
+    matrixText.textContent = n;
+    requestAnimationFrame(()=> matrixText.classList.add('show'));
+    await new Promise(r=>setTimeout(r, 700));
+    matrixText.classList.remove('show');
+    await new Promise(r=>setTimeout(r, 300));
+  }
+}
+
+async function runMatrixSequence(){
+  initMatrix();
+  await new Promise(r=>setTimeout(r, 3000));
+  await runCountdown();
+  await showWord('Happy');
+  await showWord('Birthday');
+  await showWord('to');
+  await showWord('Lobyety');
+  await showWord('❤', true);
+
+  stopMatrix();
+  showScene('stage2');
+  initGalaxy();
+}
+
+/* ============ STAGE 2: GALAXY + BOOK (real drag page-turn) ============ */
+function initGalaxy(){
+  const stage = document.getElementById('stage2');
+  if(stage.dataset.starsInit) return;
+  stage.dataset.starsInit = '1';
+  for(let i=0;i<60;i++){
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random()*2 + 1;
+    s.style.width = size+'px';
+    s.style.height = size+'px';
+    s.style.top = Math.random()*100+'%';
+    s.style.left = Math.random()*100+'%';
+    s.style.animationDelay = (Math.random()*3)+'s';
+    stage.appendChild(s);
+  }
+  document.querySelectorAll('.photo-page img').forEach(img=>{
+    img.onerror = function(){
+      const wrap = img.closest('.frame') || img.parentElement;
+      wrap.outerHTML = '<div class="fallback">' + img.alt + '</div>';
+    };
+  });
+}
+
+const book = document.getElementById('book');
+const loveMessage = document.getElementById('loveMessage');
+const swipeHint = document.getElementById('swipeHintWrap');
+// leaves ordered front-to-back: cover(0), photo1(1), photo2(2), photo3(3), photo4(4)
+const leaves = [0,1,2,3,4].map(i => book.querySelector('.leaf[data-i="'+i+'"]'));
+let current = 0;       // index of the leaf currently on top, able to be turned
+let bookClosed = false;
+let dragging = false;
+let startX = 0;
+let activeLeaf = null;
+let bookWidth = 0;
+
+function setMessage(html){
+  loveMessage.classList.remove('show');
+  setTimeout(()=>{
+    loveMessage.innerHTML = html;
+    loveMessage.classList.add('show');
+  }, 350);
+}
+
+function onMessageForIndex(idx){
+  if(idx === 1){
+    setMessage('Happy Birthday Basmala <span style="color:var(--red);">&#10084;</span>');
+  } else if(idx === 2){
+    setMessage('As long as you are smiling, I am happy.<br>Stay happy, my love.');
+  }
+}
+
+function closeBook(){
+  bookClosed = true;
+  swipeHint.style.opacity = 0;
+  setTimeout(()=>{
+    document.getElementById('bookWrap').classList.add('closing');
+    loveMessage.classList.remove('show');
+  }, 500);
+  setTimeout(()=>{
+    showScene('stage3');
+    buildHeart();
+  }, 1600);
+}
+
+function finishTurn(open){
+  activeLeaf.classList.remove('dragging');
+  activeLeaf.style.filter = '';
+  if(open){
+    activeLeaf.classList.add('flipped');
+    activeLeaf.style.transform = '';
+    current++;
+    onMessageForIndex(current);
+    if(current >= leaves.length){
+      setTimeout(closeBook, 500);
+    }
+  } else {
+    activeLeaf.style.transform = '';
+  }
+  activeLeaf = null;
+  dragging = false;
+}
+
+book.addEventListener('pointerdown', e=>{
+  if(bookClosed || current >= leaves.length) return;
+  book.setPointerCapture(e.pointerId);
+  dragging = true;
+  startX = e.clientX;
+  bookWidth = book.getBoundingClientRect().width;
+  activeLeaf = leaves[current];
+  activeLeaf.classList.add('dragging');
+  swipeHint.style.opacity = 0;
+});
+
+book.addEventListener('pointermove', e=>{
+  if(!dragging || !activeLeaf) return;
+  const deltaX = e.clientX - startX;
+  const dragRatio = Math.min(Math.max(-deltaX / bookWidth, 0), 1);
+  const angle = -dragRatio * 178;
+  activeLeaf.style.transform = `rotateY(${angle}deg)`;
+  activeLeaf.style.filter = `brightness(${1 - dragRatio*0.28})`;
+});
+
+function endDrag(e){
+  if(!dragging || !activeLeaf) return;
+  const deltaX = e.clientX - startX;
+  const dragRatio = Math.min(Math.max(-deltaX / bookWidth, 0), 1);
+  finishTurn(dragRatio > 0.35);
+}
+
+book.addEventListener('pointerup', endDrag);
+book.addEventListener('pointercancel', endDrag);
+
+/* ============ STAGE 3: PHOTO HEART ============ */
+function heartOutlinePoints(n){
+  const raw = [];
+  for(let i=0;i<n;i++){
+    const t = (i / n) * Math.PI * 2;
+    const x = 16 * Math.pow(Math.sin(t), 3);
+    const y = 13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t);
+    raw.push({x, y});
+  }
+  const xs = raw.map(p=>p.x), ys = raw.map(p=>p.y);
+  const minX = Math.min(...xs), maxX = Math.max(...xs);
+  const minY = Math.min(...ys), maxY = Math.max(...ys);
+  return raw.map(p=>({
+    left: ((p.x - minX) / (maxX - minX)) * 78 + 11,
+    top: ((maxY - p.y) / (maxY - minY)) * 78 + 11
+  }));
+}
+
+let heartBuilt = false;
+function buildHeart(){
+  if(heartBuilt) return;
+  heartBuilt = true;
+  const grid = document.getElementById('heartGrid');
+  const points = heartOutlinePoints(16);
+  points.forEach((pos, i)=>{
+    const slot = document.createElement('div');
+    slot.className = 'photo-slot';
+    slot.style.top = pos.top + '%';
+    slot.style.left = pos.left + '%';
+    slot.style.animationDelay = (i * 0.08) + 's';
+
+    const fileName = 'photo' + (i+1) + '.jpg';
+    const img = document.createElement('img');
+    img.src = fileName;
+    img.alt = 'Photo ' + (i+1);
+    img.onerror = function(){
+      slot.innerHTML = '<div class="fallback">Photo ' + (i+1) + '</div>';
+    };
+    slot.appendChild(img);
+    grid.appendChild(slot);
+  });
+}
+</script>
+</body>
+</html>
