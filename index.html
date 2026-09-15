@@ -151,10 +151,13 @@
     font-family:'Great Vibes', cursive; color:var(--pink-glow); font-size:clamp(1.6rem,4.5vw,2.4rem);
     text-shadow:0 0 12px rgba(255,63,160,.6); text-align:center;
   }
- #heartGrid{
-  position:relative; width:min(75vw, 330px);
-    animation: heartbeat 1.8s ease-in-out infinite;
-    animation-delay:2.4s;
+#heartGrid{
+  position:relative;
+  width:min(75vw, 330px);
+  height:min(75vw, 330px);
+  animation: heartbeat 1.8s ease-in-out infinite;
+  animation-delay:2.4s;
+}
   }
   @keyframes heartbeat{
     0%,100%{ transform:scale(1); }
