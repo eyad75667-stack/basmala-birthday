@@ -264,10 +264,10 @@
         <div class="photo-page"><div class="frame"><img src="photo3.jpg" alt="Photo 3"></div></div>
       </div>
       <div class="leaf" data-i="2" style="z-index:3;">
-        <div class="photo-page"><div class="frame"><img src="photo2.jpg" alt="Photo 2"></div></div>
+        <div class="photo-page"><div class="frame"><img src="photo2.jpeg" alt="Photo 2"></div></div>
       </div>
       <div class="leaf" data-i="1" style="z-index:4;">
-        <div class="photo-page"><div class="frame"><img src="photo1.jpg" alt="Photo 1"></div></div>
+        <div class="photo-page"><div class="frame"><img src="photo1.jpeg" alt="Photo 1"></div></div>
       </div>
       <div class="leaf" data-i="0" style="z-index:5;">
         <div class="cover-art">
@@ -527,7 +527,7 @@ function buildHeart(){
   if(heartBuilt) return;
   heartBuilt = true;
   const grid = document.getElementById('heartGrid');
-  const points = heartOutlinePoints(16);
+  const points = heartOutlinePoints(10);
   points.forEach((pos, i)=>{
     const slot = document.createElement('div');
     slot.className = 'photo-slot';
@@ -535,7 +535,7 @@ function buildHeart(){
     slot.style.left = pos.left + '%';
     slot.style.animationDelay = (i * 0.08) + 's';
 
-    const fileName = 'photo' + (i+1) + '.jpg';
+  const fileName = 'photo' + (i+5) + '.jpg';
     const img = document.createElement('img');
     img.src = fileName;
     img.alt = 'Photo ' + (i+1);
